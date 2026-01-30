@@ -2,6 +2,9 @@ package ecommerce.controller;
 
 import java.util.List;
 
+import ecommerce.dto.CreateProductRequest;
+import ecommerce.dto.ProductResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,8 +33,16 @@ public class ProductController {
 
 	// 1. List
 	@GetMapping
-	public List<Product> list() {
-		return productRepository.findAll();
+	public List<ProductResponse> list() {
+		return productRepository.findAll()
+				.stream()
+				.map(p -> new ProductResponse(
+						p.getId(),
+						p.getName(),
+						p.getPrice(),
+						p.getStock()
+				))
+				.toList();
 	}
 	
 	// 2. Get One
@@ -43,8 +54,21 @@ public class ProductController {
 	
 	// 3. Create
 	@PostMapping
-	public Product create(@RequestBody Product product) {
-		return productRepository.save(product);
+	public ProductResponse create(@RequestBody @Valid CreateProductRequest req) {
+		Product product = new Product(
+				req.getName(),
+				req.getPrice(),
+				req.getStock()
+		);
+
+		Product saved = productRepository.save(product);
+
+		return new ProductResponse(
+				saved.getId(),
+				saved.getName(),
+				saved.getPrice(),
+				saved.getStock()
+		);
 	}
 	
 	// 4. Update
