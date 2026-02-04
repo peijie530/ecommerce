@@ -2,7 +2,6 @@ package ecommerce.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.IllegalFormatCodePointException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,7 +47,6 @@ public class Product {
 	
 	public Product(String name, BigDecimal price, Integer stock) {
 		this.name = name;
-		this.imageUrl = imageUrl;
 		this.price = price;
 		this.stock = stock;
 	}
