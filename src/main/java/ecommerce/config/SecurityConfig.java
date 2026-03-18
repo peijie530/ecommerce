@@ -20,9 +20,17 @@ public class SecurityConfig {
     // SecurityFilterChain：用來定義「Security 的過濾規則」（誰能進哪些 API）
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 初期開發先關閉 CSRF 並允許所有請求，方便我們測試註冊 API
+    	
+        // 關閉 CSRF 並允許所有請求，方便我們測試註冊 API
         http.csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        
+        	// 2. 允許 H2 Console 使用 iframe 顯示網頁內容
+        	.headers(headers -> headers.frameOptions(frame -> frame.disable()))
+        	// 3. 設定權限
+            .authorizeHttpRequests(auth -> auth
+            		.requestMatchers("/h2-console/**").permitAll() // 確保 H2 路徑完全放行
+            		.anyRequest().permitAll() // 其他請求也都先放行
+            ); 
         return http.build();
     }
 }
