@@ -1,5 +1,7 @@
 package ecommerce.service.impl;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import ecommerce.config.JwtUtils;
 import ecommerce.dto.LoginRequest;
 import ecommerce.dto.RegisterRequest;
 import ecommerce.entity.User;
+import ecommerce.entity.UserRole;
 import ecommerce.entity.UserStatus;
 import ecommerce.repository.UserRepository;
 import ecommerce.service.UserService;
@@ -66,4 +69,32 @@ public class UserServiceImpl implements UserService{
 	    // 4. 生成並回傳 JWT
 	    return jwtUtils.generateToken(user.getEmail());
 	}
+	
+	@Override
+	public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public User updateStatus(Long id, UserStatus status) {
+        User user = findById(id);
+        if (user == null) return null;
+        user.setStatus(status);
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateRole(Long id, UserRole role) {
+        User user = findById(id);
+        if (user == null) return null;
+        user.setRole(role);
+        return userRepository.save(user);
+    }
 }
