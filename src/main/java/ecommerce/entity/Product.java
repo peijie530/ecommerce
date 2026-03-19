@@ -3,8 +3,13 @@ package ecommerce.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +20,7 @@ import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "products")
+@EntityListeners(AuditingEntityListener.class)  // 開啟自動監聽時間
 public class Product {
 
 	@Id
@@ -34,15 +40,17 @@ public class Product {
 	private Integer stock;
 	
 	@Version // 避免庫存被超賣
-	private Long version;
+	private Long version = 0L;  // 給初始值0
 	
+	@CreatedDate  // Spring 會自動填入建立時間
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 	
+	@LastModifiedDate  // Spring 每次更新會自動改時間
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 	
-	// JPA needs a no-args constructor
+	
 	protected Product() {}
 	
 	public Product(String name, BigDecimal price, Integer stock) {
@@ -51,18 +59,6 @@ public class Product {
 		this.stock = stock;
 	}
 	
-	@PrePersist
-	void onCreate() {
-		this.createdAt = this.updatedAt = LocalDateTime.now();
-		if (this.version == null) {
-			this.version = 0L;
-		}
-	}
-	
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();
-	}
 	
 	
 	public Long getId() {
@@ -101,9 +97,13 @@ public class Product {
 		return version;
 	}
 
-    // 庫存操作（之後下單會用到）
+    // 庫存操作（下單會用到）
     public void decreaseStock(int quantity) {
+    	
+    	//  IllegalArgumentException：用於「呼叫者提供的輸入不符合規範」 ex：quantity <= 0
         if (quantity <= 0) throw new IllegalArgumentException("quantity must be > 0");
+        
+        // IllegalStateException：用於「物件當前狀態不允許操作」 ex：庫存不夠扣
         if (this.stock < quantity) throw new IllegalStateException("insufficient stock");
         this.stock -= quantity;
     }

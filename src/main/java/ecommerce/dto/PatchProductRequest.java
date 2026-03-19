@@ -4,18 +4,19 @@ import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 public class PatchProductRequest {
 
-	// PATCH 的欄位可以是 null（代表不更新）
-	
-	@NotBlank  // 對 null 視為通過，但對空字串會不通過（這符合 patch 需求）
+	// 改用 @Size(min = 1)，這樣如果是 null (沒傳) 會跳過驗證
+    // 但如果有傳，長度就不能為 0 (空字串)
+	@Size(min = 1, message = "商品名稱不能為空")
 	private String name;
 	
-	@Positive  // 對 null 不會驗證，只有有值時才驗證
+	@Positive(message = "價格必須大於 0")
 	private BigDecimal price;
 	
-	@Positive 
+	@Positive(message = "庫存必須大於 0")
 	private Integer stock;
 	
 	public PatchProductRequest() {
