@@ -4,7 +4,6 @@ import ecommerce.entity.User;
 import ecommerce.entity.UserRole;
 import ecommerce.entity.UserStatus;
 import ecommerce.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +14,11 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     // 查詢所有用戶（僅 admin 可用）
     @GetMapping
