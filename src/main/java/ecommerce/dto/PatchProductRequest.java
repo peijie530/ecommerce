@@ -19,6 +19,8 @@ public class PatchProductRequest {
 	@Positive(message = "庫存必須大於 0")
 	private Integer stock;
 	
+	private String imageUrl;
+	
 	public PatchProductRequest() {
 		
 	}
@@ -43,4 +45,11 @@ public class PatchProductRequest {
 	public void setStock(Integer stock) {
 		this.stock = stock;
 	}
+	
+	public String getImageUrl() {
+    	return imageUrl;
+    }
+    public void setImageUrl(String imageUrl) {
+    	this.imageUrl = imageUrl;
+    }
 }

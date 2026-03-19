@@ -19,7 +19,10 @@ public class CreateProductRequest {
     @Positive
     private Integer stock;
     
-    public CreateProductRequest() {} // 可寫可不寫（沒寫也會有預設的）
+    private String imageUrl; 
+    
+    public CreateProductRequest() {
+    } 
 
     public String getName() {
         return name;
@@ -41,5 +44,12 @@ public class CreateProductRequest {
     }
     public void setStock(Integer stock) {
     	this.stock = stock;
+    }
+    
+    public String getImageUrl() {
+    	return imageUrl;
+    }
+    public void setImageUrl(String imageUrl) {
+    	this.imageUrl = imageUrl;
     }
 }
