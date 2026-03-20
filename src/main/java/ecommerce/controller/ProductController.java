@@ -8,6 +8,7 @@ import ecommerce.dto.ProductResponse;
 import ecommerce.dto.UpdateProductRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,98 +19,83 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import ecommerce.entity.Product;
-import ecommerce.repository.ProductRepository;
+
+import ecommerce.service.ProductService;
+
 
 
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
-	private final ProductRepository productRepository;
+	private final ProductService productService;
 	
-	public ProductController(ProductRepository productRepository) {
-		this.productRepository = productRepository;
+	public ProductController(ProductService productService) {
+		this.productService = productService;
 	}
 
-	// 1. List
+
 	@GetMapping
 	public List<ProductResponse> list() {
-		return productRepository.findAll()
-				.stream()
-				.map(this::toResponse)
+		return productService.getAllProducts()
+				.stream() // 把集合放上「資料處理輸送帶」
+				.map(this::toResponse) // 一對一轉換，每個元素都丟進後回傳新元素、把每個元素丟給 toResponse 這個方法
 				.toList();
 	}
 	
-	// 2. Get One
+	
 	@GetMapping("/{id}")
 	public ProductResponse getOne(@PathVariable Long id) {
-		Product product = getProductOrThrow(id);
+		Product product = productService.getProduct(id);
+		return toResponse(product);
+	}
+	
+	// 新增商品 (僅限管理員)
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")  // 需要 admin 權限才能呼叫此方法
+	@ResponseStatus(HttpStatus.CREATED)  // 成功回傳 201
+	public ProductResponse create(@RequestBody @Valid CreateProductRequest req) {
+		Product product = productService.createProduct(req);
+		return toResponse(product);
+	}
+	
+	// 全量更新 (僅限管理員)
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ProductResponse update(@PathVariable Long id, @RequestBody @Valid UpdateProductRequest req) {
+		Product product = productService.updateProduct(id, req);
+		return toResponse(product);
+	}
+	
+	// // 局部更新 (僅限管理員)
+	@PatchMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ProductResponse patch(@PathVariable Long id, @RequestBody @Valid PatchProductRequest req) {
+		Product product = productService.patchProduct(id, req);
 		return toResponse(product);
 	}
 	
 	
-	// 3. Create
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED) // 建立資源回 201
-	public ProductResponse create(@RequestBody @Valid CreateProductRequest req) {
-		Product product = new Product(req.getName(), req.getPrice(), req.getStock());
-		Product saved = productRepository.save(product);
-		return toResponse(saved);
-	}
-	
-	// 4. Update
-	@PutMapping("/{id}")
-	public ProductResponse update(@PathVariable Long id, @RequestBody @Valid UpdateProductRequest req) {
-		Product product = getProductOrThrow(id);
-		
-		product.setName(req.getName());
-		product.setPrice(req.getPrice());
-		product.setStock(req.getStock());
-		
-		Product saved = productRepository.save(product);
-		return toResponse(saved);
-	}
-	
-	// Patch 部分更新
-	@PatchMapping("/{id}")
-	public ProductResponse patch(@PathVariable Long id, @RequestBody @Valid PatchProductRequest req) {
-		Product product = getProductOrThrow(id);
-		
-		if (req.getName() != null) {
-			product.setName(req.getName());
-		}
-		if (req.getPrice() != null) {
-			product.setPrice(req.getPrice());
-		}
-		if (req.getStock() != null) {
-			product.setStock(req.getStock());
-		}
-		
-		Product saved = productRepository.save(product);
-		return toResponse(saved);
-	}
-	
-	
-	// 5. Delete
+	// 刪除商品 (僅限管理員)
 	@DeleteMapping("/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)   // 刪除成功回 204
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseStatus(HttpStatus.NO_CONTENT)  // 成功回傳 204
 	public void delete(@PathVariable Long id) {
-		if (!productRepository.existsById(id)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + id);
-		}
-		productRepository.deleteById(id);
+		productService.deleteProduct(id);
 	}
 	
+	// 輔助方法：將 Entity 轉為 Response DTO
+    private ProductResponse toResponse(Product product) {
+        return new ProductResponse(
+            product.getId(), 
+            product.getName(), 
+            product.getPrice(), 
+            product.getStock(),
+            product.getImageUrl() 
+        );
+    }
 	
-	private ProductResponse toResponse(Product product) {
-		return new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getStock());
-	}
 	
-	private Product getProductOrThrow(Long id) {
-		return productRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + id)); 
-	}
 }
