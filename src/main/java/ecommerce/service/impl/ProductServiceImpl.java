@@ -26,7 +26,7 @@ public class ProductServiceImpl implements ProductService{
 	@Override
 	@Transactional
 	public Product createProduct(CreateProductRequest request) {
-		Product product = new Product(request.getName(), request.getPrice(), request.getStock());
+		Product product = new Product(request.getName(), request.getPrice(), request.getStock(), request.getImageUrl());
 		return productRepository.save(product);
 	}
 	

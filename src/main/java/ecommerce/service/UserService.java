@@ -2,17 +2,20 @@ package ecommerce.service;
 
 import ecommerce.dto.LoginRequest;
 import ecommerce.dto.RegisterRequest;
-import ecommerce.entity.User;
+import ecommerce.dto.UserResponse;
 import ecommerce.entity.UserRole;
 import ecommerce.entity.UserStatus;
 import java.util.List;
 
-public interface UserService {
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-	User register(RegisterRequest request);
+public interface UserService extends UserDetailsService{
+
+	UserResponse register(RegisterRequest request);
 	String login(LoginRequest request);
-    List<User> findAll();
-    User findById(Long id);
-    User updateStatus(Long id, UserStatus status);
-    User updateRole(Long id, UserRole role);
+    List <UserResponse> findAll();
+    UserResponse findById(Long id);
+    UserResponse updateStatus(Long id, UserStatus status);
+    UserResponse updateRole(Long id, UserRole role);
+    void deleteUser(Long id);
 }

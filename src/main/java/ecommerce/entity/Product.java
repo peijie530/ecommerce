@@ -13,8 +13,6 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
@@ -53,10 +51,11 @@ public class Product {
 	
 	protected Product() {}
 	
-	public Product(String name, BigDecimal price, Integer stock) {
+	public Product(String name, BigDecimal price, Integer stock, String imageUrl) {
 		this.name = name;
 		this.price = price;
 		this.stock = stock;
+		this.imageUrl = imageUrl;
 	}
 	
 	
