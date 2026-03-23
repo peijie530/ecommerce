@@ -37,4 +37,13 @@ public class GlobalExceptionHandler {
 		
 		return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	// 處理庫存不足或狀態不對的錯誤 (409 代表衝突，適合庫存問題)
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<Object> handleIllegalState(IllegalStateException ex) {
+	    Map<String, Object> body = new LinkedHashMap<>();
+	    body.put("status", 409);
+	    body.put("message", "操作失敗：" + ex.getMessage()); // 這裡會抓到 "insufficient stock"
+	    return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+	}
 }
