@@ -70,15 +70,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 				// 這樣後面的 @PreAuthorize("hasRole('ADMIN')") 才能抓到誰是管理員
 				SecurityContextHolder.getContext().setAuthentication(authToken);
 				
-				// 繼續執行後續的過濾器鏈
-				filterChain.doFilter(request, response);
-				
 			}
 			
+			// 繼續執行後續的過濾器鏈
+			filterChain.doFilter(request, response);
 			
 		}
 	}
 		
-	
-
 }
