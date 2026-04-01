@@ -8,6 +8,7 @@ import ecommerce.dto.ProductResponse;
 import ecommerce.dto.UpdateProductRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,43 +48,43 @@ public class ProductController {
 	
 	
 	@GetMapping("/{id}")
-	public ProductResponse getOne(@PathVariable Long id) {
+	public ResponseEntity<ProductResponse> getOne(@PathVariable Long id) {
 		Product product = productService.getProduct(id);
-		return toResponse(product);
+		return ResponseEntity.ok(toResponse(product));  // 包進 OK 盒子裡
 	}
 	
 	// 新增商品 (僅限管理員)
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")  // 需要 admin 權限才能呼叫此方法
 	@ResponseStatus(HttpStatus.CREATED)  // 成功回傳 201
-	public ProductResponse create(@RequestBody @Valid CreateProductRequest req) {
+	public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest req) {
 		Product product = productService.createProduct(req);
-		return toResponse(product);
+		return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(product));
 	}
 	
 	// 全量更新 (僅限管理員)
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ProductResponse update(@PathVariable Long id, @RequestBody @Valid UpdateProductRequest req) {
+	public ResponseEntity<ProductResponse> update(@PathVariable Long id, @RequestBody @Valid UpdateProductRequest req) {
 		Product product = productService.updateProduct(id, req);
-		return toResponse(product);
+		return ResponseEntity.ok(toResponse(product));
 	}
 	
 	// // 局部更新 (僅限管理員)
 	@PatchMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ProductResponse patch(@PathVariable Long id, @RequestBody @Valid PatchProductRequest req) {
+	public ResponseEntity<ProductResponse> patch(@PathVariable Long id, @RequestBody @Valid PatchProductRequest req) {
 		Product product = productService.patchProduct(id, req);
-		return toResponse(product);
+		return ResponseEntity.ok(toResponse(product));
 	}
 	
 	
 	// 刪除商品 (僅限管理員)
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	@ResponseStatus(HttpStatus.NO_CONTENT)  // 成功回傳 204
-	public void delete(@PathVariable Long id) {
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		productService.deleteProduct(id);
+		return ResponseEntity.noContent().build();  // 成功回傳 204
 	}
 	
 	// 輔助方法：將 Entity 轉為 Response DTO

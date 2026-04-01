@@ -3,6 +3,7 @@ package ecommerce.service;
 import ecommerce.dto.LoginRequest;
 import ecommerce.dto.RegisterRequest;
 import ecommerce.dto.UserResponse;
+import ecommerce.entity.User;
 import ecommerce.entity.UserRole;
 import ecommerce.entity.UserStatus;
 import java.util.List;
@@ -14,6 +15,7 @@ public interface UserService extends UserDetailsService{
 	UserResponse register(RegisterRequest request);
 	String login(LoginRequest request);
     List <UserResponse> findAll();
+    User getCurrentUser();
     UserResponse findById(Long id);
     UserResponse updateStatus(Long id, UserStatus status);
     UserResponse updateRole(Long id, UserRole role);

@@ -3,6 +3,9 @@ package ecommerce.service.impl;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -82,7 +85,7 @@ public class UserServiceImpl implements UserService{
 	    }
 
 	    // 生成並回傳 JWT
-	    return jwtUtils.generateToken(user.getEmail());
+	    return jwtUtils.generateToken(user.getEmail(), user.getRole().name());
 	}
 	
 	@Override
@@ -92,6 +95,29 @@ public class UserServiceImpl implements UserService{
 				.map(this::toResponse)  // 將清單中每個 User 轉成 UserResponse
 				.toList();
     }
+	
+	
+	@Override
+	public User getCurrentUser() {
+		// 從 SecurityContextHolder 取出當前登入者的 email
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		// 檢查是否已登入 (排除掉匿名用戶)
+		// AnonymousAuthenticationToken 是 Spring Security 用來表示「匿名用戶」的類別，
+		// 如果當前的 authentication 是這個類別，代表沒有真正登入
+		if (authentication == null || !authentication.isAuthenticated() 
+		        || authentication instanceof AnonymousAuthenticationToken) {
+		        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "請先登入");
+		    }
+		
+		// 取得登入時存進去的 Email (在 JWT Filter 存的是 Email)
+	    String email = authentication.getName();
+	    
+	    // 4. 去資料庫找人
+	    return userRepository.findByEmail(email)
+	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到使用者"));
+	
+	}
 
     @Override
     public UserResponse findById(Long id) {
