@@ -3,6 +3,7 @@ package ecommerce.entity;
 
 
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +84,13 @@ public class Cart {
 	    item.setCart(this);   // Item 端也要知道屬於哪個 Cart，存檔時 cart_id 才有值
 	}
 	
-	
+	public BigDecimal calculateTotalPrice() {  // 單價 × 數量 = 該商品的小計
+	    return items.stream() // 把購物車 item 列表轉成 stream
+	    		// 計算每一筆商品的「單價 × 數量」
+	                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+	                // 把所有小計金額加總
+	                // 回傳總金額（BigDecimal）
+	                .reduce(BigDecimal.ZERO, BigDecimal::add); // 把所有小計加總起來得到購物車的總價
+	}
 	
 }
